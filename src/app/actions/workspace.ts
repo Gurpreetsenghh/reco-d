@@ -436,7 +436,7 @@ export const getWixContent = async () => {
     })
 
     // Corrected Wix query syntax
-    const videos = await myWixClient.items.query('opal-videos').find()
+    const videos = await myWixClient.items.query('reco-d-videos').find()
 
     const videoIds = videos.items.map((v : any) => v.data?.title)
 
