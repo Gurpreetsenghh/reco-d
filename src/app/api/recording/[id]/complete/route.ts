@@ -6,27 +6,25 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // 1. Await both the params and the request body
     const { id } = await params
     const body = await req.json()
 
-    // 2. Validate the body to prevent crashes if filename is missing
-    if (!body?.filename) {
-      return NextResponse.json({ error: 'Filename is required' }, { status: 400 })
+    // Validate both filename and the new videoUrl
+    if (!body?.filename || !body?.videoUrl) {
+      return NextResponse.json({ error: 'Filename and Video URL are required' }, { status: 400 })
     }
 
-    // 3. Use updateMany instead of update (unless you have a @@unique compound index)
     const completeProcessing = await client.video.updateMany({
       where: {
         userId: id,
-        source: body.filename,
+        source: body.filename, // Find the record using the temporary filename
       },
       data: {
         processing: false,
+        source: body.videoUrl, // Overwrite the filename with the Cloudinary URL
       },
     })
 
-    // 4. updateMany returns a count of updated records
     if (completeProcessing.count > 0) {
       return NextResponse.json({ message: 'Video processing completed' }, { status: 200 })
     }
