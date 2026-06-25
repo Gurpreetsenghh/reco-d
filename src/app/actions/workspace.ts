@@ -6,6 +6,7 @@ import { sendEmail } from './user'
 import { createClient, OAuthStrategy } from '@wix/sdk'
 import { items } from '@wix/data'
 import axios from 'axios'
+import { createHash } from 'crypto'
 
 export const verifyAccessToWorkspace = async (workspaceId: string) => {
   try {
@@ -290,6 +291,132 @@ export const moveVideoLocation = async (
     return { status: 404, data: 'workspace/folder not found' }
   } catch (error) {
     return { status: 500, data: 'Oops! something went wrong' }
+  }
+}
+
+const getCloudinaryPublicId = (source: string) => {
+  try {
+    const uploadedPath = new URL(source).pathname.split('/upload/')[1]
+
+    if (!uploadedPath) return null
+
+    const withoutVersion = uploadedPath.replace(/^v\d+\//, '')
+
+    return withoutVersion.replace(/\.[^.\/]+$/, '')
+  } catch (error) {
+    return null
+  }
+}
+
+const deleteCloudinaryVideo = async (source: string) => {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME
+  const apiKey = process.env.CLOUDINARY_API_KEY
+  const apiSecret = process.env.CLOUDINARY_API_SECRET
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    return {
+      status: 500,
+      data: 'Cloudinary configuration is missing',
+    }
+  }
+
+  const publicId = getCloudinaryPublicId(source)
+
+  if (!publicId) {
+    return {
+      status: 400,
+      data: 'Invalid Cloudinary video URL',
+    }
+  }
+
+  const timestamp = Math.round(Date.now() / 1000)
+  const signaturePayload = `public_id=${publicId}&timestamp=${timestamp}`
+  const signature = createHash('sha1')
+    .update(`${signaturePayload}${apiSecret}`)
+    .digest('hex')
+
+  const cloudinaryResponse = await axios.post(
+    `https://api.cloudinary.com/v1_1/${cloudName}/video/destroy`,
+    new URLSearchParams({
+      public_id: publicId,
+      api_key: apiKey,
+      timestamp: String(timestamp),
+      signature,
+    }),
+    {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    }
+  )
+
+  if (
+    cloudinaryResponse.data?.result === 'ok' ||
+    cloudinaryResponse.data?.result === 'not found'
+  ) {
+    return {
+      status: 200,
+      data: 'Video removed from Cloudinary',
+    }
+  }
+
+  return {
+    status: 500,
+    data: 'Failed to delete video from Cloudinary',
+  }
+}
+
+export const deleteVideo = async (videoId: string) => {
+  try {
+    const user = await currentUser()
+
+    if (!user) {
+      return { status: 404, data: 'User not found' }
+    }
+
+    const video = await client.video.findUnique({
+      where: {
+        id: videoId,
+      },
+      select: {
+        id: true,
+        source: true,
+        User: {
+          select: {
+            clerkid: true,
+          },
+        },
+      },
+    })
+
+    if (!video) {
+      return { status: 404, data: 'Video not found' }
+    }
+
+    if (video.User?.clerkid !== user.id) {
+      return { status: 403, data: 'You are not authorized to delete this video' }
+    }
+
+    const cloudinaryDelete = await deleteCloudinaryVideo(video.source)
+
+    if (cloudinaryDelete.status !== 200) {
+      return cloudinaryDelete
+    }
+
+    const deletedVideo = await client.video.delete({
+      where: {
+        id: video.id,
+      },
+    })
+
+    if (deletedVideo) {
+      return { status: 200, data: 'Video deleted successfully' }
+    }
+
+    return { status: 500, data: 'Failed to delete video from database' }
+  } catch (error) {
+    console.error('DELETE VIDEO ERROR:', error)
+    return { status: 500, data: 'Internal Server Error' }
   }
 }
 

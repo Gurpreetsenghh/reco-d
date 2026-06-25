@@ -40,6 +40,7 @@ const Videos = ({ folderId, videosKey, workspaceId }: Props) => {
           videos.map((video) => (
             <VideoCard
               key={video.id}
+              videosKey={videosKey}
               workspaceId={workspaceId}
               {...video}
             />

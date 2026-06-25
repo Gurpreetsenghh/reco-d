@@ -25,6 +25,7 @@ type Props = {
   source: string
   processing: boolean
   workspaceId: string
+  videosKey: string
 }
 
 const VideoCard = (props: Props) => {
@@ -48,6 +49,7 @@ const VideoCard = (props: Props) => {
             videoId={props.id}
             currentWorkspace={props.workspaceId}
             currentFolder={props.Folder?.id}
+            videosKey={props.videosKey}
           />
           <CopyLink
             className="p-1.25 h-5 bg-hover:bg-transparent bg-[#252525]"

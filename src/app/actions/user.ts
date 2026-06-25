@@ -13,17 +13,29 @@ export const sendEmail = async (
   text: string,
   html?: string
 ) => {
+  const host = process.env.MAIL_TRAP_HOST || process.env.SMTP_HOST || 'smtp.gmail.com'
+  const port = Number(
+    process.env.MAIL_TRAP_PORT || process.env.SMTP_PORT || (host.includes('gmail') ? 465 : 587)
+  )
+  const user = process.env.MAIL_TRAP_USER_ID || process.env.MAILER_EMAIL
+  const pass = process.env.MAIL_TRAP_USER_PASSWORD || process.env.MAILER_PASSWORD
+
+  if (!user || !pass) {
+    throw new Error('Missing SMTP credentials. Set MAIL_TRAP_USER_ID and MAIL_TRAP_USER_PASSWORD, or MAILER_EMAIL and MAILER_PASSWORD.')
+  }
+
   const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    host,
+    port,
+    secure: port === 465,
     auth: {
-      user: process.env.MAILER_EMAIL,
-      pass: process.env.MAILER_PASSWORD,
+      user,
+      pass,
     },
   })
 
   const mailOptions = {
+    from: process.env.MAIL_FROM || user,
     to,
     subject,
     text,
