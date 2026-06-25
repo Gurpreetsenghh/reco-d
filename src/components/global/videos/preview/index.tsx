@@ -1,112 +1,155 @@
-'use client'
-
-import { getPreviewVideo, sendEmailForFirstView } from '@/app/actions/workspace'
-import { useQueryData } from '@/hooks/useQueryData'
-import { VideoProps } from '@/types/index.type'
-import { useRouter } from 'next/navigation'
-import React, { useEffect } from 'react'
-import CopyLink from '../copy-link'
-import RichLink from '../rich-link'
-import { truncateString } from '@/lib/utils'
-import { Download } from 'lucide-react'
-import TabMenu from '@/components/global/tabs'
-import AiTools from '../../ai-tools'
-import VideoTranscript from '@/components/global/video-transcript'
-import Activities from '../../activities'
-import EditVideo from '../edit'
+"use client";
+import { getPreviewVideo, sendEmailForFirstView } from "@/app/actions/workspace";
+import { useQueryData } from "@/hooks/useQueryData";
+import { VideoProps } from "@/types/index.type";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import CopyLink from "../copy-link";
+import RichLink from "../rich-link";
+import { truncateString } from "@/lib/utils";
+import { Download } from "lucide-react";
+import TabMenu from "../../tabs";
+import AiTools from "../../ai-tools";
+import VideoTranscript from "../../video-transcript";
+import Activities from "../../activities";
+import EditVideo from "../edit";
 
 type Props = {
-  videoId: string
-}
+  videoId: string;
+};
 
 const VideoPreview = ({ videoId }: Props) => {
-  const router = useRouter()
+  // ==========================================
+  // 1. ALL HOOKS GO HERE AT THE VERY TOP
+  // ==========================================
+  const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
 
-  const { data } = useQueryData(['preview-video'], () =>
-    getPreviewVideo(videoId)
-  )
+  const { data } = useQueryData(["preview-video"], () =>
+    getPreviewVideo(videoId),
+  );
 
-  const notifyFirstView = async () => await sendEmailForFirstView(videoId)
+  // Safely extract data so our hooks don't crash before data arrives
+  const videoData = data as VideoProps | undefined;
+  const video = videoData?.data;
+  const status = videoData?.status;
+  const author = videoData?.author;
 
-  const { data: video, status, author } = data as VideoProps
+  // Hook: Handle Hydration
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Hook: Handle unauthorized/bad status redirects
+  useEffect(() => {
+    if (status && status !== 200) {
+      router.push("/");
+    }
+  }, [status, router]);
+
+  // Hook: Handle first view notification safely
+  useEffect(() => {
+    if (video && video.views === 0) {
+      const notifyFirstView = async () => await sendEmailForFirstView(videoId);
+      notifyFirstView();
+      
+      return () => {
+        notifyFirstView();
+      };
+    }
+  }, [video?.views, videoId]); 
+
+  // ==========================================
+  // 2. ALL EARLY RETURNS GO HERE AFTER HOOKS
+  // ==========================================
+  if (!isMounted) return null;
+
+  if (!data) {
+    return (
+      <div className="flex h-screen items-center justify-center text-white text-xl">
+        Loading video details...
+      </div>
+    );
+  }
+
+  if (status && status !== 200) {
+    return null;
+  }
+
+  if (!video) {
+    return (
+      <div className="flex h-screen items-center justify-center text-white text-xl">
+        Video not found.
+      </div>
+    );
+  }
+
+  // ==========================================
+  // 3. RENDER CONTENT
+  // ==========================================
   
-  if (status !== 200) router.push('/')
+  // Removed the regex replace that was stripping out the .webm.webm extension
+  const previewSource = video.source.trim();
 
   const daysAgo = Math.floor(
-    (new Date().getTime() - new Date(video.createdAt).getTime()) / (24 * 60 * 60 * 1000)
-  )
-
-  useEffect(() => {
-    if (video.views === 0) {
-      notifyFirstView()
-    }
-    return () => {
-      notifyFirstView()
-    }
-  }, [])
+    (Date.now() - new Date(video.createdAt).getTime()) / (24 * 60 * 60 * 1000)
+  );
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 lg:py-10 py-5 overflow-y-auto gap-5 px-4 lg:px-0">
-      <div className="flex flex-col lg:col-span-2 gap-y-6 lg:gap-y-10">
+    <div className="grid grid-cols-1 xl:grid-cols-3 lg:py-10 overflow-y-auto gap-5">
+      <div className="flex flex-col lg:col-span-2 gap-y-10">
         <div>
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-x-5 items-start justify-between">
-            <h2 className="text-white text-2xl sm:text-4xl font-bold">{video.title}</h2>
+          <div className="flex gap-x-5 items-start justify-between">
+            <h2 className="text-white text-4xl font-bold">{video.title}</h2>
             {author ? (
               <EditVideo
                 videoId={videoId}
                 title={video.title as string}
                 description={video.description as string}
               />
-            ) : null}
+            ) : (
+              <></>
+            )}
           </div>
-          <span className="flex gap-x-3 mt-2 text-sm sm:text-base">
+          <span className="flex gap-x-3 mt-2">
             <p className="text-[#9D9D9D] capitalize">
               {video.User?.firstname} {video.User?.lastname}
             </p>
             <p className="text-[#707070]">
-              {daysAgo === 0 ? 'Today' : `${daysAgo}d ago`}
+              {daysAgo === 0 ? "Today" : `${daysAgo}d ago`}
             </p>
           </span>
         </div>
-
-        {/* --- UPDATED VIDEO PLAYER SECTION --- */}
-        {video.processing ? (
-          <div className="w-full aspect-video flex items-center justify-center bg-gray-800/30 animate-pulse rounded-xl">
-            <p className="text-white text-lg font-medium">Processing video... Please wait.</p>
-          </div>
-        ) : (
-          <video
-            preload="metadata"
-            className="w-full aspect-video opacity-50 rounded-xl"
-            controls
-            src={video.source} // Direct Cloudinary URL from the database
-          >
-            Your browser does not support the video tag.
-          </video>
-        )}
-        {/* ---------------------------------- */}
-
-        <div className="flex flex-col text-xl sm:text-2xl gap-y-4">
+        <video
+          preload="metadata"
+          className="w-full aspect-video opacity-50 rounded-xl"
+          controls
+        >
+          <source src={previewSource} />
+        </video>
+        <div className="flex flex-col text-2xl gap-y-4">
           <div className="flex gap-x-5 items-center justify-between">
-            <p className="text-[#BDBDBD] font-semibold">Description</p>
+            <p className="text-[#BDBDBD] text-semibold">Description</p>
             {author ? (
               <EditVideo
                 videoId={videoId}
                 title={video.title as string}
                 description={video.description as string}
               />
-            ) : null}
+            ) : (
+              <></>
+            )}
           </div>
-          <p className="text-[#9D9D9D] text-base sm:text-lg font-medium">
+          <p className="text-[#9D9D9D] text-lg text-medium">
             {video.description}
           </p>
         </div>
       </div>
-      <div className="lg:col-span-1 flex flex-col gap-y-8 lg:gap-y-16">
-        <div className="flex flex-wrap justify-center sm:justify-end gap-3 items-center">
+      <div className="lg:col-span-1 flex flex-col gap-y-16">
+        <div className="flex justify-end gap-x-3 items-center">
           <CopyLink
             variant="outline"
-            className="rounded-full bg-transparent px-4 sm:px-10 text-sm"
+            className="rounded-full bg-transparent px-10"
             videoId={videoId}
           />
           <RichLink
@@ -120,15 +163,13 @@ const VideoPreview = ({ videoId }: Props) => {
         <div>
           <TabMenu
             defaultValue="Ai tools"
-            triggers={['Ai tools', 'Transcript', 'Activity']}
-            className="w-full"
+            triggers={["Ai tools", "Transcript", "Activity"]}
           >
             <AiTools
               videoId={videoId}
               trial={video.User?.trial!}
               plan={video.User?.subscription?.plan!}
             />
-            
             <VideoTranscript transcript={video.summery!} />
             <Activities
               author={video.User?.firstname as string}
@@ -138,7 +179,7 @@ const VideoPreview = ({ videoId }: Props) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default VideoPreview
+export default VideoPreview;

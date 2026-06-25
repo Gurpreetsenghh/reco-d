@@ -40,14 +40,6 @@ const AiTools = ({ plan, trial, videoId }: Props) => {
           </div>
 
           <div className="flex gap-4 w-full justify-end">
-            <Button className=" mt-2 text-sm">
-              <Loader
-                state={false}
-                color="#000"
-              >
-                Try now
-              </Loader>
-            </Button>
             {/* WIP: Pay button  */}
             <Button
               className="mt-2 text-sm"

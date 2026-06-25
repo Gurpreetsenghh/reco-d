@@ -7,6 +7,7 @@ import CopyLink from './copy-link'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Dot, Share2, User } from 'lucide-react'
+import Image from 'next/image'
 
 type Props = {
   User: {
@@ -31,12 +32,16 @@ const VideoCard = (props: Props) => {
     (new Date().getTime() - props.createdAt.getTime()) / (24 * 60 * 60 * 1000)
   )
 
+  // Cloudinary automatically generates a thumbnail for every video.
+  // We just need to replace the video extension (.webm/.mp4) with .jpg
+  const thumbnailUrl = props.source ? props.source.replace(/\.[a-z0-9]+$/i, '.jpg') : '';
+
   return (
     <Loader
       className="bg-[#171717] flex justify-center items-center border-[1px] border-[rgb(37,37,37)] rounded-xl"
       state={props.processing}
     >
-      <div className=" group overflow-hidden cursor-pointer bg-[#171717] relative border-[1px] border-[#252525] flex flex-col rounded-xl">
+      <div className="group overflow-hidden cursor-pointer bg-[#171717] relative border-[1px] border-[#252525] flex flex-col rounded-xl">
         <div className="absolute top-3 right-3 z-50 gap-x-3 hidden group-hover:flex">
           <CardMenu
             currentFolderName={props.Folder?.name}
@@ -53,15 +58,21 @@ const VideoCard = (props: Props) => {
           href={`/dashboard/${props.workspaceId}/video/${props.id}`}
           className="hover:bg-[#252525] transition duration-150 flex flex-col justify-between h-full"
         >
-          <video
-            controls={false}
-            preload="metadata"
-            className="w-full aspect-video opacity-50 z-20"
-          >
-            <source
-              src={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${props.source}#t=1`}
-            />
-          </video>
+          
+          {/* Swapped <video> for Next.js <Image> */}
+          <div className="relative w-full aspect-video z-20 bg-neutral-900">
+            {thumbnailUrl && (
+              <Image
+                src={thumbnailUrl}
+                alt={props.title || "Video Thumbnail"}
+                fill
+                className="object-cover opacity-50"
+                // unoptimized bypasses the need to whitelist Cloudinary in next.config.ts
+                unoptimized 
+              />
+            )}
+          </div>
+
           <div className="px-5 py-3 flex flex-col gap-7-2 z-20">
             <h2 className="text-sm font-semibold text-[#BDBDBD]">
               {props.title}
