@@ -2,6 +2,7 @@
 import FolderDuotone from '@/components/icons/folder-duotone'
 import { cn } from '@/lib/utils'
 import { ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import Folder from './folder'
 import { useQueryData } from '@/hooks/useQueryData'
@@ -57,10 +58,13 @@ const Folders = ({ workspaceId }: Props) => {
           <FolderDuotone />
           <h2 className="text-[#BDBDBD] text-xl"> Folders</h2>
         </div>
-        <div className="flex items-center gap-2 cursor-pointer">
+        <Link
+          href={`/dashboard/${workspaceId}/folders`}
+          className="flex items-center gap-2 cursor-pointer transition-opacity hover:opacity-80"
+        >
           <p className="text-[#BDBDBD]">See all</p>
           <ArrowRight color="#707070" />
-        </div>
+        </Link>
       </div>
       
       {/* THE FIX: Replaced flex with a responsive grid */}

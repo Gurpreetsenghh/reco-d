@@ -18,16 +18,7 @@ type Props = {}
 const InfoBar = (props: Props) => {
   return (
     <header className="pl-20 md:pl-[66.25px] fixed p-4 w-full flex items-center justify-between gap-4 bg-[#171717]/80 backdrop-blur-md z-40 border-b border-[#252525]">
-      <div className="flex gap-4 justify-center items-center border border-[#252525] rounded-full px-4 w-full max-w-lg bg-[#1a1a1a]">
-        <Search
-          size={25}
-          className="text-[#707070]"
-        />
-        <Input
-          className="bg-transparent border-none placeholder-neutral-500 text-white focus-visible:ring-0 focus-visible:ring-offset-0"
-          placeholder="Search for people, projects, tags & folders"
-        />
-      </div>
+      
       <div className="flex items-center gap-4">
         
         {/* Record Button wrapped in a Dialog */}
