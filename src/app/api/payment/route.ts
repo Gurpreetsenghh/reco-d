@@ -2,13 +2,18 @@ import { currentUser } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_CLIENT_SECRET as string)
-
 export async function GET() {
+  // 1. Move Stripe initialization INSIDE the route handler
+  // This prevents Next.js from evaluating it at build time.
+  const stripe = new Stripe(process.env.STRIPE_CLIENT_SECRET as string)
+
   console.log(process.env.STRIPE_CLIENT_SECRET, 'GEt endpoint hit👉🏻')
+  
   const user = await currentUser()
   if (!user) return NextResponse.json({ status: 404 })
+  
   const priceId = process.env.STRIPE_SUBSCRIPTION_PRICE_ID
+  
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
     line_items: [

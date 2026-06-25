@@ -16,8 +16,8 @@ export default function Home() {
     <main className="relative min-h-screen overflow-hidden bg-[#0A0A0A] text-white selection:bg-purple-500/30">
       {/* Background Glow */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-1/2 top-[-200px] h-[700px] w-[700px] -translate-x-1/2 rounded-full bg-purple-600/20 blur-[180px]" />
-        <div className="absolute bottom-[-250px] right-0 h-[500px] w-[500px] rounded-full bg-indigo-600/10 blur-[180px]" />
+        <div className="absolute left-1/2 -top-50 h-175 w-175 -translate-x-1/2 rounded-full bg-purple-600/20 blur-[180px]" />
+        <div className="absolute -bottom-62.5 right-0 h-125 w-125 rounded-full bg-indigo-600/10 blur-[180px]" />
       </div>
 
       {/* Navigation */}
@@ -54,7 +54,7 @@ export default function Home() {
               <br />
               Recordings Into
               <br />
-              <span className="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
                 Clear Communication
               </span>
             </h1>
@@ -240,7 +240,7 @@ export default function Home() {
           </div>
 
           {/* Pro */}
-          <div className="relative rounded-3xl border border-purple-500 bg-gradient-to-b from-purple-600 to-purple-900 p-10 shadow-2xl shadow-purple-500/20">
+          <div className="relative rounded-3xl border border-purple-500 bg-linear-to-b from-purple-600 to-purple-900 p-10 shadow-2xl shadow-purple-500/20">
             <div className="absolute right-8 top-0 -translate-y-1/2 rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-wide text-black">
               Recommended
             </div>
@@ -290,7 +290,7 @@ export default function Home() {
 
       {/* CTA */}
       <section className="px-6 py-28">
-        <div className="mx-auto max-w-4xl rounded-3xl border border-purple-500/20 bg-gradient-to-b from-purple-600/20 to-transparent p-12 text-center">
+        <div className="mx-auto max-w-4xl rounded-3xl border border-purple-500/20 bg-linear-to-b from-purple-600/20 to-transparent p-12 text-center">
           <h2 className="text-4xl font-bold md:text-5xl">
             Start Recording Today
           </h2>

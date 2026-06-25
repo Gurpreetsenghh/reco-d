@@ -1,3 +1,6 @@
+
+export const dynamic = 'force-dynamic'
+
 import { onAuthenticateUser } from '@/app/actions/user'
 import { redirect } from 'next/navigation'
 

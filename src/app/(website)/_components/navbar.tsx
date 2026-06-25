@@ -27,7 +27,7 @@ export const LandingPageNavBar = () => {
         <Link href="/" className="flex items-center gap-x-3">
           <Image
             alt="reco-d logo"
-            src="/reco-d-logof.png"
+            src="/reco-d-logo.png"
             width={40}
             height={40}
             className="w-auto h-auto"

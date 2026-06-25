@@ -25,7 +25,7 @@ const FoldersPage = async ({ params }: Props) => {
 
       {folders.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {folders.map((folder) => (
+          {folders.map((folder : any) => (
             <Link
               key={folder.id}
               href={`/dashboard/${workspaceId}/folder/${folder.id}`}
