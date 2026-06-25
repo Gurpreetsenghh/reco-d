@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import type { MouseEvent, ReactNode } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sparkles, Video, FolderOpen, ArrowRight, Share2, Bot, MonitorPlay, X } from "lucide-react";
+import { Sparkles, Video, FolderOpen, ArrowRight, Share2, Bot, MonitorPlay, Download } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
-const DESKTOP_APP_URL = "https://google.com"; // Replace with the actual URL of your desktop app
+const DESKTOP_APP_URL = "https://google.com";
 
 const FeatureCard = ({ icon, title, desc }: { icon: ReactNode; title: string; desc: string }) => (
   <div style={{ display: "flex", alignItems: "flex-start", gap: 14, background: "#141416", border: "1px solid #2a2a2d", borderRadius: 16, padding: "18px 20px" }}>
@@ -20,16 +28,48 @@ const FeatureCard = ({ icon, title, desc }: { icon: ReactNode; title: string; de
   </div>
 );
 
+// Defined locally inside the file so you don't need a new component file
+const RecordModal = ({ children }: { children: ReactNode }) => {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        {children}
+      </DialogTrigger>
+
+      <DialogContent className="bg-[#171717] border-[#252525] text-white sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold">
+            Get the Desktop App
+          </DialogTitle>
+          <DialogDescription className="text-[#BDBDBD] mt-2">
+            To capture your screen, camera, and microphone seamlessly in 1080p,
+            you need the reco-d desktop application.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex flex-col gap-3 mt-6">
+          <Button
+            asChild
+            className="w-full bg-[#a22fe0] hover:bg-[#a22fe0]/80 text-white flex items-center gap-2 py-6 rounded-xl"
+          >
+            <a href={DESKTOP_APP_URL} target="_blank" rel="noopener noreferrer">
+              <Download size={20} />
+              Download for Windows
+            </a>
+          </Button>
+        </div>
+
+        <p className="text-center text-xs text-[#707070] mt-4">
+          Version 1.0.0 • Lightweight Electron Client
+        </p>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 const Home = () => {
-  const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const libraryUrl = pathname?.endsWith("/home") ? pathname.replace("/home", "") : pathname;
-  const handleDownloadMouseEnter = (event: MouseEvent<HTMLAnchorElement>) => {
-    event.currentTarget.style.background = "#e4e4e7";
-  };
-  const handleDownloadMouseLeave = (event: MouseEvent<HTMLAnchorElement>) => {
-    event.currentTarget.style.background = "#fafafa";
-  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 32, paddingBottom: 60, maxWidth: 960, width: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
@@ -51,15 +91,17 @@ const Home = () => {
           <p style={{ color: "#71717a", fontSize: 16, lineHeight: 1.7, margin: "0 0 36px", maxWidth: 480 }}>
             A simple screen recorder with AI summaries and instant sharing. No clutter, no complexity — just record and send.
           </p>
-          <button
-            onClick={() => setOpen(true)}
-            style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#9d4edd", color: "#fff", padding: "12px 28px", borderRadius: 999, fontSize: 15, fontWeight: 600, border: "none", cursor: "pointer", boxShadow: "0 4px 24px rgba(157,78,221,0.35)" }}
-            onMouseEnter={e => (e.currentTarget.style.background = "#7b2cbf")}
-            onMouseLeave={e => (e.currentTarget.style.background = "#9d4edd")}
-          >
-            Start Recording
-            <ArrowRight size={16} />
-          </button>
+          
+          <RecordModal>
+            <button
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#9d4edd", color: "#fff", padding: "12px 28px", borderRadius: 999, fontSize: 15, fontWeight: 600, border: "none", cursor: "pointer", boxShadow: "0 4px 24px rgba(157,78,221,0.35)" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "#7b2cbf")}
+              onMouseLeave={e => (e.currentTarget.style.background = "#9d4edd")}
+            >
+              Start Recording
+              <ArrowRight size={16} />
+            </button>
+          </RecordModal>
         </div>
       </div>
 
@@ -67,18 +109,20 @@ const Home = () => {
       <div>
         <h2 style={{ color: "#e4e4e7", fontSize: 17, fontWeight: 600, margin: "0 0 16px", letterSpacing: "-0.01em" }}>Quick Actions</h2>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-          <div
-            onClick={() => setOpen(true)}
-            style={{ background: "#141416", border: "1px solid #27272a", borderRadius: 24, padding: 28, cursor: "pointer", transition: "border-color 0.2s, transform 0.2s" }}
-            onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(157,78,221,0.4)"; (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "#27272a"; (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"; }}
-          >
-            <div style={{ width: 44, height: 44, borderRadius: 14, background: "#1f1f23", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18, color: "#a1a1aa" }}>
-              <Video size={22} />
+          
+          <RecordModal>
+            <div
+              style={{ background: "#141416", border: "1px solid #27272a", borderRadius: 24, padding: 28, cursor: "pointer", transition: "border-color 0.2s, transform 0.2s" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(157,78,221,0.4)"; (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "#27272a"; (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"; }}
+            >
+              <div style={{ width: 44, height: 44, borderRadius: 14, background: "#1f1f23", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18, color: "#a1a1aa" }}>
+                <Video size={22} />
+              </div>
+              <h3 style={{ color: "#fafafa", fontWeight: 600, fontSize: 16, margin: "0 0 6px" }}>New Recording</h3>
+              <p style={{ color: "#52525b", fontSize: 13, lineHeight: 1.55, margin: 0 }}>Capture your screen and microphone with our lightweight desktop app.</p>
             </div>
-            <h3 style={{ color: "#fafafa", fontWeight: 600, fontSize: 16, margin: "0 0 6px" }}>New Recording</h3>
-            <p style={{ color: "#52525b", fontSize: 13, lineHeight: 1.55, margin: 0 }}>Capture your screen and microphone with our lightweight desktop app.</p>
-          </div>
+          </RecordModal>
 
           <Link
             href={libraryUrl}
@@ -104,61 +148,6 @@ const Home = () => {
           <FeatureCard icon={<Bot size={18} />} title="AI Summaries" desc="Auto transcript and key takeaways after every recording." />
         </div>
       </div>
-
-      {/* Custom Modal — no shadcn, full inline control */}
-      {open && (
-        <div
-          style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
-          onClick={() => setOpen(false)}
-        >
-          {/* Backdrop */}
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }} />
-
-          {/* Modal */}
-          <div
-            style={{ position: "relative", width: "100%", maxWidth: 420, background: "#121214", border: "1px solid #27272a", borderRadius: 20, padding: 28, boxShadow: "0 24px 80px rgba(0,0,0,0.6)" }}
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Close */}
-            <button
-              onClick={() => setOpen(false)}
-              style={{ position: "absolute", top: 16, right: 16, width: 28, height: 28, borderRadius: 8, background: "#1f1f23", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#71717a" }}
-            >
-              <X size={14} />
-            </button>
-
-            {/* Icon */}
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: "#1f1f23", border: "1px solid #27272a", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", color: "#a1a1aa" }}>
-              <Video size={22} />
-            </div>
-
-            {/* Text */}
-            <h2 style={{ color: "#fafafa", fontSize: 18, fontWeight: 600, textAlign: "center", margin: "0 0 8px", letterSpacing: "-0.02em" }}>
-              Desktop app required
-            </h2>
-            <p style={{ color: "#71717a", fontSize: 14, lineHeight: 1.6, textAlign: "center", margin: "0 0 24px" }}>
-              To record your screen you'll need the reco-d desktop app installed on your computer.
-            </p>
-
-            {/* Already installed hint */}
-            <div style={{ background: "#1a1a1d", border: "1px solid #27272a", borderRadius: 12, padding: "14px 16px", marginBottom: 14, textAlign: "center" }}>
-              <p style={{ color: "#e4e4e7", fontSize: 13, fontWeight: 500, margin: "0 0 3px" }}>Already installed?</p>
-              <p style={{ color: "#52525b", fontSize: 13, margin: 0 }}>Launch reco-d from your Start Menu to begin recording.</p>
-            </div>
-
-            {/* Download button */}
-            <a
-              href={DESKTOP_APP_URL}
-              download
-              style={{ display: "block", width: "100%", background: "#fafafa", color: "#09090b", padding: "12px 0", borderRadius: 999, fontSize: 14, fontWeight: 600, textAlign: "center", textDecoration: "none", boxSizing: "border-box", transition: "background 0.2s" }}
-              onMouseEnter={handleDownloadMouseEnter}
-              onMouseLeave={handleDownloadMouseLeave}
-            >
-              Download for Windows
-            </a>
-          </div>
-        </div>
-      )}
 
     </div>
   );

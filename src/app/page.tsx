@@ -776,7 +776,7 @@ export default function Home() {
             {
               icon: <><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></>,
               title: "Screen + camera, in one take",
-              desc: "Capture your screen, webcam, and mic simultaneously — up to 1080p. No software to install, works entirely in the browser.",
+              desc: "Capture your screen, webcam, and mic simultaneously — up to 1080p.",
             },
             {
               icon: <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>,
