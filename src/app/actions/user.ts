@@ -375,6 +375,9 @@ export const inviteMembers = async (
           },
         })
 
+        // Safely format the sender's name to avoid 'null' strings
+        const senderName = `${user.firstName || ''} ${user.lastName || ''}`.trim()
+
         await client.user.update({
           where: {
             id: recieverId, 
@@ -382,7 +385,7 @@ export const inviteMembers = async (
           data: {
             notification: {
               create: {
-                content: `${user.firstName} ${user.lastName} invited you to join the ${workspace.name} workspace.`,
+                content: `${senderName} invited you to join the ${workspace.name} workspace.`,
               },
             },
           },
