@@ -1,4 +1,3 @@
-
 'use client'
 
 import React from 'react'
@@ -61,7 +60,8 @@ const CardMenu = ({
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => mutate()}
+        // Passed videoId to mutate to satisfy TypeScript's argument requirement
+        onClick={() => mutate({ id: videoId } as any)} 
         className="h-8 w-8 text-[#6b6b6b] hover:text-red-500 hover:bg-red-500/10"
       >
         <Loader state={isPending}>
