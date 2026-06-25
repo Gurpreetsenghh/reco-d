@@ -50,12 +50,6 @@ const Page = async ( {params} : Props) => {
               >
                 Videos
               </TabsTrigger>
-              <TabsTrigger
-                value="archive"
-                className="p-3.25 px-6 rounded-full data-[state=active]:bg-[#252525]"
-              >
-                Archive
-              </TabsTrigger>
             </TabsList>
             <div className="flex gap-x-3">
               <CreateWorkspace />
